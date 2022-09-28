@@ -45,12 +45,18 @@ void InitIO()
     _TRISG7 = 0; // LED Bleue
     
     
-    //pin
+    //pin gauche
 
     _TRISB14 = 0 ; // pins B14
     
     _TRISB15 = 0 ; // pins B15
 
+    //pins droits
+    
+    _TRISC6 = 0 ;
+    
+    _TRISC7 = 0 ;
+    
     // Moteurs 
 
 

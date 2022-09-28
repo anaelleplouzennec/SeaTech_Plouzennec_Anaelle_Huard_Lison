@@ -27,13 +27,13 @@ int main(void) {
     LED_BLANCHE = 1;
     LED_BLEUE = 1;
     LED_ORANGE = 1;
-    
-     InitTimer23 () ;
-     InitTimer1 () ;
-     
-     InitPWM();
-     PWMSetSpeed(30);
-     
+
+    InitTimer23();
+    InitTimer1();
+
+    InitPWM();
+    PWMSetSpeed(20, MOTEUR_DROIT);
+
     /****************************************************************************************************/
     // Boucle Principale
     /****************************************************************************************************/
@@ -42,7 +42,7 @@ int main(void) {
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
     } // fin main
-    
-    
+
+
 }
 

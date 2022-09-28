@@ -28,11 +28,35 @@ void InitPWM(void) {
     PTCONbits.PTEN = 1;
 }
 
-void PWMSetSpeed(float vitesseEnPourcents) {
-    robotState.vitesseGaucheCommandeCourante = vitesseEnPourcents;
-    MOTEUR_GAUCHE_L_PWM_ENABLE = 0; //Pilotage de la pin en mode IO
-    MOTEUR_GAUCHE_L_IO_OUTPUT = 1; //Mise à 1 de la pin
-    MOTEUR_GAUCHE_H_PWM_ENABLE = 1; //Pilotage de la pin en mode PWM
-    MOTEUR_GAUCHE_DUTY_CYCLE = Abs(robotState.vitesseGaucheCommandeCourante * PWMPER);
+void PWMSetSpeed(float vitesseEnPourcents, unsigned char motorNumber) {
+    if (motorNumber == MOTEUR_GAUCHE) {
+        if (vitesseEnPourcents >= 0) {
+            robotState.vitesseGaucheCommandeCourante = vitesseEnPourcents;
+            MOTEUR_GAUCHE_L_PWM_ENABLE = 0; //Pilotage de la pin en mode IO
+            MOTEUR_GAUCHE_L_IO_OUTPUT = 1; //Mise à 1 de la pin
+            MOTEUR_GAUCHE_H_PWM_ENABLE = 1; //Pilotage de la pin en mode PWM
+            MOTEUR_GAUCHE_DUTY_CYCLE = Abs(robotState.vitesseGaucheCommandeCourante * PWMPER);
+        } else {
+            robotState.vitesseGaucheCommandeCourante = vitesseEnPourcents;
+            MOTEUR_GAUCHE_L_PWM_ENABLE = 1; //Pilotage de la pin en mode PWM
+            MOTEUR_GAUCHE_H_PWM_ENABLE = 0; //Pilotage de la pin en mode IO
+            MOTEUR_GAUCHE_H_IO_OUTPUT = 1; //Mise à 1 de la pin
+            MOTEUR_GAUCHE_DUTY_CYCLE = Abs(robotState.vitesseGaucheCommandeCourante * PWMPER);
+        }
+    } else if (motorNumber == MOTEUR_DROIT) {
+        if (vitesseEnPourcents >= 0) {
+            robotState.vitesseDroiteCommandeCourante = vitesseEnPourcents;
+            MOTEUR_DROIT_L_PWM_ENABLE = 0; //Pilotage de la pin en mode IO
+            MOTEUR_DROIT_L_IO_OUTPUT = 1; //Mise à 1 de la pin
+            MOTEUR_DROIT_H_PWM_ENABLE = 1; //Pilotage de la pin en mode PWM
+            MOTEUR_DROIT_DUTY_CYCLE = Abs(robotState.vitesseDroiteCommandeCourante * PWMPER);
+        } else {
+            robotState.vitesseDroiteCommandeCourante = vitesseEnPourcents;
+            MOTEUR_DROIT_L_PWM_ENABLE = 1; //Pilotage de la pin en mode IO
+            MOTEUR_DROIT_H_IO_OUTPUT = 1; //Mise à 1 de la pin
+            MOTEUR_DROIT_H_PWM_ENABLE = 0; //Pilotage de la pin en mode PWM
+            MOTEUR_DROIT_DUTY_CYCLE = Abs(robotState.vitesseDroiteCommandeCourante * PWMPER);
+        }
+    }
 }
 

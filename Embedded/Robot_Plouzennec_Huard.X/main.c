@@ -32,8 +32,8 @@ int main(void) {
     InitTimer1();
 
     InitPWM();
-    PWMSetSpeed(20, MOTEUR_DROIT);
-
+    //PWMSetSpeed(20, MOTEUR_DROIT);
+    PWMSetSpeedConsigne(20, MOTEUR_DROIT);
     /****************************************************************************************************/
     // Boucle Principale
     /****************************************************************************************************/

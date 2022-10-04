@@ -14,7 +14,7 @@
 #include "PWM.h"
 #include "ADC.h"
 
-float ADCValue0, ADCValue1, ADCValue2;
+unsigned int ADCValue0, ADCValue1, ADCValue2;
 
 int main(void) {
     /***************************************************************************************************/
@@ -43,12 +43,28 @@ int main(void) {
     // Boucle Principale
     /****************************************************************************************************/
     while (1) {
-        if (ADCIsConversionFinished() == 1){
+        if (ADCIsConversionFinished() == 1) {
             unsigned int * result = ADCGetResult();
             ADCClearConversionFinishedFlag();
             ADCValue0 = result[0];
+            if (ADCValue0 > 345) {
+                LED_ORANGE = 1;
+            } else {
+                LED_ORANGE = 0;
+            }
             ADCValue1 = result[1];
+            if (ADCValue1 > 345) {
+                LED_BLEUE = 1;
+            } else {
+                LED_BLEUE = 0;
+            }
             ADCValue2 = result[2];
+            if (ADCValue2 > 345) {
+                LED_BLANCHE = 1;
+            } else {
+                LED_BLANCHE = 0;
+            }
+
         }
         //LED_BLANCHE = !LED_BLANCHE;
         //LED_BLEUE = !LED_BLEUE;

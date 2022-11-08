@@ -63,11 +63,11 @@ int main(void) {
             sensorCode = 0b00000;
             if (robotState.distanceTelemetreGauche2 < 30)
                 sensorCode = sensorCode | 0b10000;
-            if (robotState.distanceTelemetreGauche < 30)
+            if (robotState.distanceTelemetreGauche < 35)
                 sensorCode = sensorCode | 0b01000;
-            if (robotState.distanceTelemetreCentre < 30)
+            if (robotState.distanceTelemetreCentre < 40)
                 sensorCode = sensorCode | 0b00100;
-            if (robotState.distanceTelemetreDroit < 30)
+            if (robotState.distanceTelemetreDroit < 35)
                 sensorCode = sensorCode | 0b00010;
             if (robotState.distanceTelemetreDroit2 < 30)
                 sensorCode = sensorCode | 0b00001;

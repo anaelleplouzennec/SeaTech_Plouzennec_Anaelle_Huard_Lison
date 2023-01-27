@@ -51,7 +51,7 @@ namespace RobotInterface
             while(robot.byteListReceived.Count>0)
             {
                 var c = robot.byteListReceived.Dequeue();
-                textBoxReception.Text += c.ToString("X2") +"\t";
+                textBoxReception.Text += "0x"+c.ToString("X2") +" ";
             }
             // ToString()  donne en décimal
             // ToString("X")  donne en héxadécimal

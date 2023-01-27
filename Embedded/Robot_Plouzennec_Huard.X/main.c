@@ -15,6 +15,7 @@
 #include "ADC.h"
 #include "Robot.h"
 #include "main.h"
+#include "UART.h"
 
 unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
@@ -41,7 +42,7 @@ int main(void) {
     InitPWM();
     PWMSetSpeedConsigne(20, MOTEUR_DROIT);
     InitADC1();
-
+    InitUART();
     /****************************************************************************************************/
     // Boucle Principale
     /****************************************************************************************************/
@@ -95,6 +96,9 @@ int main(void) {
         //LED_BLANCHE = !LED_BLANCHE;
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
+        
+        //SendMessageDirect((unsigned char*) "Bonjour", 7);
+        //__delay32(40000000);
     } // fin main
 }
 

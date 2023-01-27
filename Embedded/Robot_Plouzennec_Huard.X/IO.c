@@ -63,6 +63,8 @@ void InitIO()
 
     //********** Configuration des entrées : _TRISxx = 1 ********************************   
 
+    //UART
+    _U1RXR = 24 ;
+    _RP36R = 0b00001;
     
-
 }

@@ -16,6 +16,9 @@
 #include "Robot.h"
 #include "main.h"
 #include "UART.h"
+#include "CB_TX1.h"
+#include <libpic30.h>
+#include "CB_RX1.h"
 
 unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
@@ -92,11 +95,20 @@ int main(void) {
                 LED_BLANCHE = 0;
             }
 
+            //            SendMessage((unsigned char*) "Bonjour",7);
         }
+
+        int i;
+        for (i = 0; i < CB_RX1_GetDataSize(); i++) {
+            unsigned char c = CB_RX1_Get();
+            SendMessage(&c, 1);
+        }
+        __delay32(1000);
         //LED_BLANCHE = !LED_BLANCHE;
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
-        
+
+
         //SendMessageDirect((unsigned char*) "Bonjour", 7);
         //__delay32(40000000);
     } // fin main
@@ -162,21 +174,21 @@ void OperatingSystemLoop(void) {
         case STATE_TOURNE_SUR_PLACE_DROITE_EN_COURS:
             SetNextRobotStateInAutomaticMode();
             break;
-            
-        case STATE_TOURNE_LEGER_DROITE : 
+
+        case STATE_TOURNE_LEGER_DROITE:
             PWMSetSpeedConsigne(-10, MOTEUR_DROIT);
             PWMSetSpeedConsigne(15, MOTEUR_GAUCHE);
             stateRobot = STATE_TOURNE_LEGER_DROITE_EN_COURS;
-            
+
         case STATE_TOURNE_LEGER_DROITE_EN_COURS:
             SetNextRobotStateInAutomaticMode();
             break;
 
-        case STATE_TOURNE_LEGER_GAUCHE : 
+        case STATE_TOURNE_LEGER_GAUCHE:
             PWMSetSpeedConsigne(15, MOTEUR_DROIT);
             PWMSetSpeedConsigne(-10, MOTEUR_GAUCHE);
             stateRobot = STATE_TOURNE_LEGER_GAUCHE_EN_COURS;
-            
+
         case STATE_TOURNE_LEGER_GAUCHE_EN_COURS:
             SetNextRobotStateInAutomaticMode();
             break;
@@ -287,8 +299,8 @@ void SetNextRobotStateInAutomaticMode(void) {
         case 0b11111:
             nextStateRobot = STATE_TOURNE_SUR_PLACE_GAUCHE;
             break;
-        
-        
+
+
 
     }
     //    unsigned char positionObstacle = PAS_D_OBSTACLE;
@@ -311,15 +323,15 @@ void SetNextRobotStateInAutomaticMode(void) {
 
 
 
-//    //Détermination de l?état à venir du robot
-//    if (positionObstacle == PAS_D_OBSTACLE)
-//        nextStateRobot = STATE_AVANCE;
-//    else if (positionObstacle == OBSTACLE_A_DROITE)
-//        nextStateRobot = STATE_TOURNE_GAUCHE;
-//    else if (positionObstacle == OBSTACLE_A_GAUCHE)
-//        nextStateRobot = STATE_TOURNE_DROITE;
-//    else if (positionObstacle == OBSTACLE_EN_FACE)
-//        nextStateRobot = STATE_TOURNE_SUR_PLACE_GAUCHE;
+    //    //Détermination de l?état à venir du robot
+    //    if (positionObstacle == PAS_D_OBSTACLE)
+    //        nextStateRobot = STATE_AVANCE;
+    //    else if (positionObstacle == OBSTACLE_A_DROITE)
+    //        nextStateRobot = STATE_TOURNE_GAUCHE;
+    //    else if (positionObstacle == OBSTACLE_A_GAUCHE)
+    //        nextStateRobot = STATE_TOURNE_DROITE;
+    //    else if (positionObstacle == OBSTACLE_EN_FACE)
+    //        nextStateRobot = STATE_TOURNE_SUR_PLACE_GAUCHE;
 
     //Si l?on n?est pas dans la transition de l?étape en cours
     if (nextStateRobot != stateRobot - 1)

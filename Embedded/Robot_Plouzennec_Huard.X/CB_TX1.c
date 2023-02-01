@@ -10,7 +10,7 @@ unsigned char isTransmitting = 0;
 
 void SendMessage(unsigned char* message, int length) {
     unsigned char i = 0;
-    if (CB_TX1_RemainingSize() > length) {
+    if (CB_TX1_GetRemainingSize() > length) {
         //On peut écrire le message
         for (i = 0; i < length; i++)
             CB_TX1_Add(message[i]);
@@ -20,17 +20,22 @@ void SendMessage(unsigned char* message, int length) {
 }
 
 void CB_TX1_Add(unsigned char value) {
-    if (cbTx1Head != CBTX1_BUFFER_SIZE) {
+    
     cbTx1Buffer[cbTx1Head] = value;
-    cbTx1Head = cbTx1Head + 1;
-    }else 
-    cbTx1Head = 0;
+    cbTx1Head ++;
+    if (cbTx1Head >= CBTX1_BUFFER_SIZE){
+        cbTx1Head=0;
+    }
 }
 
 unsigned char CB_TX1_Get(void) {
     char valeur;
-    valeur = ;
-    cbTx1Tail = cbTx1Tail +1;
+    valeur = cbTx1Buffer[cbTx1Tail];
+    cbTx1Tail ++;
+    if (cbTx1Tail >= CBTX1_BUFFER_SIZE){
+        cbTx1Tail=0;
+    }
+    return valeur;
 }
 
 void __attribute__((interrupt, no_auto_psv)) _U1TXInterrupt(void) {
@@ -54,16 +59,16 @@ unsigned char CB_TX1_IsTranmitting(void) {
 int CB_TX1_GetDataSize(void) {
     //return size of data stored in circular buffer
     int dataSize;
-    if cbTx1Head > cbTx1Tail{
-    datasize = cbTx1Head - cbTx1Tail;
+    if (cbTx1Head >= cbTx1Tail){
+    dataSize = cbTx1Head - cbTx1Tail;
     }else
-        datasize = CBTX1_BUFFER_SIZE - cbTx1Tail + cbTx1Head;
+        dataSize = CBTX1_BUFFER_SIZE - cbTx1Tail + cbTx1Head;
     return dataSize;
 }
 
 int CB_TX1_GetRemainingSize(void) {
     //return size of remaining size in circular buffer
     int remainingSize;
-    ...
+    remainingSize = CBTX1_BUFFER_SIZE - CB_TX1_GetDataSize();
     return remainingSize;
 }

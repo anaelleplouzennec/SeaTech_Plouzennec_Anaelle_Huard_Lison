@@ -40,7 +40,7 @@ namespace RobotInterface
 
         }
 
-        
+
         private void TimerAffichage_Tick(object sender, EventArgs e)
         {
             //if (robot.receivedText != "")
@@ -48,11 +48,11 @@ namespace RobotInterface
             //    textBoxReception.Text += robot.receivedText;
             //    robot.receivedText = "";
             //}
-            while(robot.byteListReceived.Count>0)
+            while (robot.byteListReceived.Count > 0)
             {
                 var c = robot.byteListReceived.Dequeue();
-                textBoxReception.Text += "0x"+c.ToString("X2") +" ";
-
+                //textBoxReception.Text += "0x" + c.ToString("X2") + " ";
+                DecodeMessage(c);
             }
             // ToString()  donne en décimal
             // ToString("X")  donne en héxadécimal
@@ -89,7 +89,7 @@ namespace RobotInterface
             serialPort1.WriteLine(textBoxEmission.Text);
             textBoxEmission.Text = "";
 
-            
+
         }
 
         private void TextBoxEmission_KeyUp(object sender, KeyEventArgs e)
@@ -110,7 +110,51 @@ namespace RobotInterface
         {
             string s = "Bonjour";
             byte[] array = Encoding.ASCII.GetBytes(s);
-            UartEncodeAndSendMessage(0x0080, array.Length, array);
+            // UartEncodeAndSendMessage(0x0080, array.Length, array);
+
+            array = new byte[] { 1, 0 };
+            array[0] = 1;
+            array[1] = 1;
+            UartEncodeAndSendMessage(0x0020, array.Length, array);
+            array[0] = 2;
+            array[1] = 0;
+            UartEncodeAndSendMessage(0x0020, array.Length, array);
+            array[0] = 3;
+            array[1] = 1;
+            UartEncodeAndSendMessage(0x0020, array.Length, array);
+
+            array = new byte[3];
+            array[0] = 1;
+            array[1] = 3;
+            array[2] = 0;
+            UartEncodeAndSendMessage(0x0030, array.Length, array);
+            array[0] = 2;
+            array[1] = 2;
+            array[2] = 0;
+            UartEncodeAndSendMessage(0x0030, array.Length, array);
+            array[0] = 3;
+            array[1] = 5;
+            array[2] = 4;
+            UartEncodeAndSendMessage(0x0030, array.Length, array);
+
+            array = new byte[3];
+            array[0] = 1;
+            array[1] = 3;
+            array[2] = 5;
+            UartEncodeAndSendMessage(0x0040, array.Length, array);
+            array[0] = 2;
+            array[1] = 2;
+            array[2] = 5;
+            UartEncodeAndSendMessage(0x0040, array.Length, array);
+
+            if (buttonEnvoyer.Background == Brushes.RoyalBlue)
+            {
+                buttonEnvoyer.Background = Brushes.Beige;
+            }
+            else
+            {
+                buttonEnvoyer.Background = Brushes.RoyalBlue;
+            }
         }
         byte CalculateChecksum(int msgFunction, int msgPayloadLength, byte[] msgPayload)
         {
@@ -171,64 +215,139 @@ namespace RobotInterface
                     {
                         rcvState = StateReception.FunctionMSB;
                     }
-                        
-                break;
+
+                    break;
                 case StateReception.FunctionMSB:
-                    msgDecodedFunction = (c<<8);
+                    msgDecodedFunction = (c << 8);
                     rcvState = StateReception.FunctionLSB;
-                break;
+                    break;
                 case StateReception.FunctionLSB:
                     msgDecodedFunction += (c << 0);
                     rcvState = StateReception.PayloadLengthMSB;
                     break;
- 
+
                 case StateReception.PayloadLengthMSB:
                     msgDecodedPayloadLength = (c << 8);
+                    rcvState = StateReception.PayloadLengthLSB;
+                    break;
+
+                case StateReception.PayloadLengthLSB:
+                    msgDecodedPayloadLength += (c << 0);
+
                     if (msgDecodedPayloadLength == 0)
                     {
                         rcvState = StateReception.CheckSum;
                     }
-                    else if (msgDecodedPayloadLength > 3600)
+                    else if (msgDecodedPayloadLength > 1024)
                     {
                         rcvState = StateReception.Waiting;
                     }
                     else
                     {
-                        rcvState = StateReception.PayloadLengthLSB;
+                        msgDecodedPayload = new byte[msgDecodedPayloadLength];
+                        msgDecodedPayloadIndex = 0;
+                        rcvState = StateReception.Payload;
                     }
-             
-                    break;
-
-                case StateReception.PayloadLengthLSB:
-                    msgDecodedPayloadLength += (c << 0);
-                    rcvState = StateReception.Payload;
-                    msgDecodedPayload = new byte[msgDecodedPayloadLength];
-                    msgDecodedPayloadIndex = 0;
+                    
                     break;
 
                 case StateReception.Payload:
-                    while(msgDecodedPayloadIndex<= msgDecodedPayloadLength)
-                    {
-                        msgDecodedPayload[msgDecodedPayloadIndex] = c;
-                        msgDecodedPayloadIndex++;
-                    }
-                    rcvState = StateReception.CheckSum;
-                    break;
-                
+                    msgDecodedPayload[msgDecodedPayloadIndex] = c;
+                    msgDecodedPayloadIndex++;
+                    if(msgDecodedPayloadIndex>= msgDecodedPayloadLength)
+                        rcvState = StateReception.CheckSum;
+                    break;                    
+
                 case StateReception.CheckSum:
                     byte calculatedChecksum;
                     byte receivedChecksum = c;
                     calculatedChecksum = CalculateChecksum(msgDecodedFunction, msgDecodedPayloadLength, msgDecodedPayload);
-                if (calculatedChecksum == receivedChecksum)
+                    if (calculatedChecksum == receivedChecksum)
                     {
-                        //Success, on a un message valide
 
+                        //Success, on a un message valide
+                        textBoxReception.Text += "ca marche ";
+                        ProcessDecodedMessage(msgDecodedFunction, msgDecodedPayloadLength, msgDecodedPayload);
                     }
                     
-                break;
+                    else
+                    {
+                        textBoxReception.Text += "ca marche pas du tout ";
+                    }
+                    rcvState = StateReception.Waiting;
+
+                    break;
                 default:
                     rcvState = StateReception.Waiting;
                     break;
             }
         }
+        void ProcessDecodedMessage(int msgFunction,int msgPayloadLength, byte[] msgPayload)
+        {
+            if (msgFunction == 0x0020)
+            {
+                if (msgPayload[0] == 1)
+                {
+                    if (msgPayload[1] == 1)
+                    {
+                        LED_1.IsChecked = true;
+                    }
+                    else
+                    {
+                        LED_1.IsChecked = false;
+                    }
+                }
+                else if (msgPayload[0] == 2)
+                {
+                    if (msgPayload[1] == 1)
+                    {
+                        LED_2.IsChecked = true;
+                    }
+                    else
+                    {
+                        LED_2.IsChecked = false;
+                    }
+                }
+                else if (msgPayload[0] == 3)
+                {
+                    if (msgPayload[1] == 1)
+                    {
+                        LED_3.IsChecked = true;
+                    }
+                    else
+                    {
+                        LED_3.IsChecked = false;
+                    }
+                }
+            }
+            else if (msgFunction == 0x0030)
+            {
+                if (msgPayload[0]==1)
+                {
+                    Télémètres_IR.Content = " IR Gauche : " + msgPayload[1] + msgPayload[2] + "cm\n" ;
+                }
+                else if (msgPayload[0] == 2)
+
+                {
+                    Télémètres_IR.Content += " IR Centre : " + msgPayload[1] + msgPayload[2] + "cm\n";
+                }
+                else if (msgPayload[0] == 3)
+                {
+                    Télémètres_IR.Content += " IR Droit : " + msgPayload[1] + msgPayload[2] + "cm\n";
+                }
+            }
+            else if (msgFunction == 0x0040)
+            {
+                if (msgPayload[0] == 1)
+                {
+                    Moteurs.Content = "Vitesse Gauche : " + msgPayload[1] + msgPayload[2] + "%\n";
+                }
+                else if (msgPayload[0] == 2)
+
+                {
+                    Moteurs.Content += "Vitesse Droit : " + msgPayload[1] + msgPayload[2] + "%\n";
+                }
+            }
+        }
     }
+}

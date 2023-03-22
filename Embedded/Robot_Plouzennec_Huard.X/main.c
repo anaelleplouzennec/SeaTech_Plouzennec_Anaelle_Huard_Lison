@@ -19,9 +19,11 @@
 #include "CB_TX1.h"
 #include <libpic30.h>
 #include "CB_RX1.h"
+#include "UART_Protocol.h"
 
 unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
+unsigned char * payload = {"B","o","n","j","o","u","r"};
 
 int main(void) {
     /***************************************************************************************************/
@@ -103,12 +105,13 @@ int main(void) {
             unsigned char c = CB_RX1_Get();
             SendMessage(&c, 1);
         }
-        __delay32(1000);
+        
         //LED_BLANCHE = !LED_BLANCHE;
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
 
-
+         UartEncodeAndSendMessage(0x0080,7,payload);
+         __delay32(1000);
         //SendMessageDirect((unsigned char*) "Bonjour", 7);
         //__delay32(40000000);
     } // fin main

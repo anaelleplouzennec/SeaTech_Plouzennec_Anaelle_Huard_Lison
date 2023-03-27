@@ -110,7 +110,7 @@ int main(void) {
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
 
-         UartEncodeAndSendMessage(0x0080,7,payload);
+        // UartEncodeAndSendMessage(0x0080,7,payload);
          __delay32(1000);
         //SendMessageDirect((unsigned char*) "Bonjour", 7);
         //__delay32(40000000);

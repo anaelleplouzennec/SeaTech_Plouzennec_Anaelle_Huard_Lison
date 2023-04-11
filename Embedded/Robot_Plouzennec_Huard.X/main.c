@@ -23,11 +23,11 @@
 
 unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
-unsigned char * payload = {"B","o","n","j","o","u","r"};
+unsigned char payload[] = {'B', 'o', 'n', 'j', 'o', 'u', 'r'};
 
 int main(void) {
     /***************************************************************************************************/
-    //Initialisation de l?oscillateur
+    //Initialisation de l'oscillateur
     /****************************************************************************************************/
     InitOscillator();
 
@@ -96,7 +96,10 @@ int main(void) {
             } else {
                 LED_BLANCHE = 0;
             }
-
+            
+            unsigned char payload[3] = { (unsigned char)robotState.distanceTelemetreGauche, (unsigned char)robotState.distanceTelemetreCentre, (unsigned char)robotState.distanceTelemetreDroit};
+            UartEncodeAndSendMessage(0x0030, 3, payload);
+            //UartEncodeAndSendMessage(0x0080,7,payload);
             //            SendMessage((unsigned char*) "Bonjour",7);
         }
 
@@ -110,7 +113,6 @@ int main(void) {
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
 
-        // UartEncodeAndSendMessage(0x0080,7,payload);
          __delay32(1000);
         //SendMessageDirect((unsigned char*) "Bonjour", 7);
         //__delay32(40000000);
@@ -338,7 +340,13 @@ void SetNextRobotStateInAutomaticMode(void) {
 
     //Si l?on n?est pas dans la transition de l?étape en cours
     if (nextStateRobot != stateRobot - 1)
+    {
+        //Appelé si on doit changer d'état 
         stateRobot = nextStateRobot;
+        unsigned char payload[] = {stateRobot, (unsigned char)(timestamp>>24), (unsigned char)(timestamp>>16), (unsigned char)(timestamp>>8), (unsigned char)(timestamp>>0)};
+        UartEncodeAndSendMessage(0x0050, 5, payload);
+                
+    }
 }
 
 

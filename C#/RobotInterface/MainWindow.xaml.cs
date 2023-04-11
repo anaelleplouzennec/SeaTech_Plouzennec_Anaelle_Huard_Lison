@@ -27,7 +27,7 @@ namespace RobotInterface
         public MainWindow()
         {
             InitializeComponent();
-            serialPort1 = new ReliableSerialPort("COM4", 115200, System.IO.Ports.Parity.None, 8, System.IO.Ports.StopBits.One);
+            serialPort1 = new ReliableSerialPort("COM5", 115200, System.IO.Ports.Parity.None, 8, System.IO.Ports.StopBits.One);
             serialPort1.DataReceived += SerialPort1_DataReceived;
             serialPort1.Open();
 
@@ -110,7 +110,7 @@ namespace RobotInterface
         {
             string s = "Bonjour";
             byte[] array = Encoding.ASCII.GetBytes(s);
-            // UartEncodeAndSendMessage(0x0080, array.Length, array);
+            UartEncodeAndSendMessage(0x0080, array.Length, array);
 
             array = new byte[] { 1, 0 };
             array[0] = 1;
@@ -248,15 +248,15 @@ namespace RobotInterface
                         msgDecodedPayloadIndex = 0;
                         rcvState = StateReception.Payload;
                     }
-                    
+
                     break;
 
                 case StateReception.Payload:
                     msgDecodedPayload[msgDecodedPayloadIndex] = c;
                     msgDecodedPayloadIndex++;
-                    if(msgDecodedPayloadIndex>= msgDecodedPayloadLength)
+                    if (msgDecodedPayloadIndex >= msgDecodedPayloadLength)
                         rcvState = StateReception.CheckSum;
-                    break;                    
+                    break;
 
                 case StateReception.CheckSum:
                     byte calculatedChecksum;
@@ -266,13 +266,13 @@ namespace RobotInterface
                     {
 
                         //Success, on a un message valide
-                        textBoxReception.Text += "ca marche ";
+                        //textBoxReception.Text += "ça marche ";
                         ProcessDecodedMessage(msgDecodedFunction, msgDecodedPayloadLength, msgDecodedPayload);
                     }
-                    
+
                     else
                     {
-                        textBoxReception.Text += "ca marche pas du tout ";
+                        textBoxReception.Text += "ça marche pas du tout ";
                     }
                     rcvState = StateReception.Waiting;
 
@@ -282,72 +282,90 @@ namespace RobotInterface
                     break;
             }
         }
-        void ProcessDecodedMessage(int msgFunction,int msgPayloadLength, byte[] msgPayload)
+
+        void ProcessDecodedMessage(int msgFunction, int msgPayloadLength, byte[] msgPayload)
         {
-            if (msgFunction == 0x0020)
+            switch (msgFunction)
             {
-                if (msgPayload[0] == 1)
-                {
-                    if (msgPayload[1] == 1)
+                case 0x0020:
+                    if (msgPayload[0] == 1)
                     {
-                        LED_1.IsChecked = true;
+                        if (msgPayload[1] == 1)
+                        {
+                            LED_1.IsChecked = true;
+                        }
+                        else
+                        {
+                            LED_1.IsChecked = false;
+                        }
                     }
-                    else
+                    else if (msgPayload[0] == 2)
                     {
-                        LED_1.IsChecked = false;
+                        if (msgPayload[1] == 1)
+                        {
+                            LED_2.IsChecked = true;
+                        }
+                        else
+                        {
+                            LED_2.IsChecked = false;
+                        }
                     }
-                }
-                else if (msgPayload[0] == 2)
-                {
-                    if (msgPayload[1] == 1)
+                    else if (msgPayload[0] == 3)
                     {
-                        LED_2.IsChecked = true;
+                        if (msgPayload[1] == 1)
+                        {
+                            LED_3.IsChecked = true;
+                        }
+                        else
+                        {
+                            LED_3.IsChecked = false;
+                        }
                     }
-                    else
-                    {
-                        LED_2.IsChecked = false;
-                    }
-                }
-                else if (msgPayload[0] == 3)
-                {
-                    if (msgPayload[1] == 1)
-                    {
-                        LED_3.IsChecked = true;
-                    }
-                    else
-                    {
-                        LED_3.IsChecked = false;
-                    }
-                }
-            }
-            else if (msgFunction == 0x0030)
-            {
-                if (msgPayload[0]==1)
-                {
-                    Télémètres_IR.Content = " IR Gauche : " + msgPayload[1] + msgPayload[2] + "cm\n" ;
-                }
-                else if (msgPayload[0] == 2)
+                    break;
 
-                {
-                    Télémètres_IR.Content += " IR Centre : " + msgPayload[1] + msgPayload[2] + "cm\n";
-                }
-                else if (msgPayload[0] == 3)
-                {
-                    Télémètres_IR.Content += " IR Droit : " + msgPayload[1] + msgPayload[2] + "cm\n";
-                }
-            }
-            else if (msgFunction == 0x0040)
-            {
-                if (msgPayload[0] == 1)
-                {
-                    Moteurs.Content = "Vitesse Gauche : " + msgPayload[1] + msgPayload[2] + "%\n";
-                }
-                else if (msgPayload[0] == 2)
+                case 0x0030:
+                    Télémètres_IR.Content = " IR Gauche : " + msgPayload[0] + "cm\n";
+                    Télémètres_IR.Content += " IR Centre : " + msgPayload[1] + "cm\n";
+                    Télémètres_IR.Content += " IR Droit : " + msgPayload[2] + "cm\n";
+                    break;
 
-                {
-                    Moteurs.Content += "Vitesse Droit : " + msgPayload[1] + msgPayload[2] + "%\n";
-                }
+                case 0x0040:
+                    if (msgPayload[0] == 1)
+                    {
+                        Moteurs.Content = "Vitesse Gauche : " + msgPayload[1] + msgPayload[2] + "%\n";
+                    }
+                    else if (msgPayload[0] == 2)
+
+                    {
+                        Moteurs.Content += "Vitesse Droit : " + msgPayload[1] + msgPayload[2] + "%\n";
+                    }
+                    break;
+
+                case 0x0050:
+                    int instant = (((int)msgPayload[1]) << 24) + (((int)msgPayload[2]) << 16) + (((int)msgPayload[3]) << 8) + ((int)msgPayload[4]);
+                    textBoxReception.Text += "\nRobot State : " + ((StateRobot)(msgPayload[0])).ToString() + " - " + instant.ToString() + " ms";
+                    break;
             }
         }
+    }
+
+    public enum StateRobot
+    {
+        STATE_ATTENTE = 0,
+        STATE_ATTENTE_EN_COURS = 1,
+        STATE_AVANCE = 2,
+        STATE_AVANCE_EN_COURS = 3,
+        STATE_TOURNE_GAUCHE = 4,
+        STATE_TOURNE_GAUCHE_EN_COURS = 5,
+        STATE_TOURNE_DROITE = 6,
+        STATE_TOURNE_DROITE_EN_COURS = 7,
+        STATE_TOURNE_SUR_PLACE_GAUCHE = 8,
+        STATE_TOURNE_SUR_PLACE_GAUCHE_EN_COURS = 9,
+        STATE_TOURNE_SUR_PLACE_DROITE = 10,
+        STATE_TOURNE_SUR_PLACE_DROITE_EN_COURS = 11,
+        STATE_ARRET = 12,
+        STATE_ARRET_EN_COURS = 13,
+        STATE_RECULE = 14,
+        STATE_RECULE_EN_COURS = 15
     }
 }

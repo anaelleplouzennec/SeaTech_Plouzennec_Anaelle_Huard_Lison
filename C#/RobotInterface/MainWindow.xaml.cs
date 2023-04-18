@@ -283,11 +283,18 @@ namespace RobotInterface
             }
         }
 
+        public enum TypeMessage
+        {
+            Leds = 0x0020,
+            Telemetre = 0x0030,
+            VitesseMoteur = 0x0040,
+            Texte = 0x0050
+        }
         void ProcessDecodedMessage(int msgFunction, int msgPayloadLength, byte[] msgPayload)
         {
-            switch (msgFunction)
+            switch ((TypeMessage)msgFunction)
             {
-                case 0x0020:
+                case TypeMessage.Leds:
                     if (msgPayload[0] == 1)
                     {
                         if (msgPayload[1] == 1)
@@ -299,9 +306,9 @@ namespace RobotInterface
                             LED_1.IsChecked = false;
                         }
                     }
-                    else if (msgPayload[0] == 2)
+                    if (msgPayload[2] == 2)
                     {
-                        if (msgPayload[1] == 1)
+                        if (msgPayload[3] == 1)
                         {
                             LED_2.IsChecked = true;
                         }
@@ -310,9 +317,9 @@ namespace RobotInterface
                             LED_2.IsChecked = false;
                         }
                     }
-                    else if (msgPayload[0] == 3)
+                    if (msgPayload[4] == 3)
                     {
-                        if (msgPayload[1] == 1)
+                        if (msgPayload[5] == 1)
                         {
                             LED_3.IsChecked = true;
                         }
@@ -323,25 +330,18 @@ namespace RobotInterface
                     }
                     break;
 
-                case 0x0030:
+                case TypeMessage.Telemetre:
                     Télémètres_IR.Content = " IR Gauche : " + msgPayload[0] + "cm\n";
                     Télémètres_IR.Content += " IR Centre : " + msgPayload[1] + "cm\n";
                     Télémètres_IR.Content += " IR Droit : " + msgPayload[2] + "cm\n";
                     break;
 
-                case 0x0040:
-                    if (msgPayload[0] == 1)
-                    {
-                        Moteurs.Content = "Vitesse Gauche : " + msgPayload[1] + msgPayload[2] + "%\n";
-                    }
-                    else if (msgPayload[0] == 2)
-
-                    {
-                        Moteurs.Content += "Vitesse Droit : " + msgPayload[1] + msgPayload[2] + "%\n";
-                    }
+                case TypeMessage.VitesseMoteur:
+                    Moteurs.Content = "Vitesse Gauche : " + msgPayload[0] + "%\n";
+                    Moteurs.Content += "Vitesse Droit : " + msgPayload[1]  + "%\n";
                     break;
 
-                case 0x0050:
+                case TypeMessage.Texte:
                     int instant = (((int)msgPayload[1]) << 24) + (((int)msgPayload[2]) << 16) + (((int)msgPayload[3]) << 8) + ((int)msgPayload[4]);
                     textBoxReception.Text += "\nRobot State : " + ((StateRobot)(msgPayload[0])).ToString() + " - " + instant.ToString() + " ms";
                     break;

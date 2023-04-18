@@ -23,7 +23,11 @@
 
 unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
+unsigned char etatEnAttente = 0;
+unsigned char stateRobot;
 unsigned char payload[] = {'B', 'o', 'n', 'j', 'o', 'u', 'r'};
+
+int counterEnvoi = 0;
 
 int main(void) {
     /***************************************************************************************************/
@@ -96,24 +100,38 @@ int main(void) {
             } else {
                 LED_BLANCHE = 0;
             }
-            
-            unsigned char payload[3] = { (unsigned char)robotState.distanceTelemetreGauche, (unsigned char)robotState.distanceTelemetreCentre, (unsigned char)robotState.distanceTelemetreDroit};
-            UartEncodeAndSendMessage(0x0030, 3, payload);
-            //UartEncodeAndSendMessage(0x0080,7,payload);
-            //            SendMessage((unsigned char*) "Bonjour",7);
+
+
+            if (counterEnvoi++ % 20 == 0) {
+                unsigned char payloadLED[6] = {(unsigned char) 1, (unsigned char) LED_ORANGE, (unsigned char) 2, (unsigned char) LED_BLEUE, (unsigned char) 3, (unsigned char) LED_BLANCHE};
+                UartEncodeAndSendMessage(0x0020, 6, payloadLED);
+                unsigned char payloadTelemetre[3] = {(unsigned char) robotState.distanceTelemetreGauche, (unsigned char) robotState.distanceTelemetreCentre, (unsigned char) robotState.distanceTelemetreDroit};
+                UartEncodeAndSendMessage(0x0030, 3, payloadTelemetre);
+                unsigned char payloadMoteur[2] = {(unsigned char) robotState.vitesseGaucheCommandeCourante, (unsigned char) robotState.vitesseDroiteCommandeCourante};
+                UartEncodeAndSendMessage(0x0040, 2, payloadMoteur);
+                //UartEncodeAndSendMessage(0x0080,7,payload);
+                //SendMessage((unsigned char*) "Bonjour",7);
+            }
         }
 
         int i;
         for (i = 0; i < CB_RX1_GetDataSize(); i++) {
             unsigned char c = CB_RX1_Get();
             SendMessage(&c, 1);
+            UartDecodeMessage(c);
         }
-        
+
+        if (etatEnAttente) {
+            etatEnAttente = 0;
+            unsigned char payload[] = {stateRobot, (unsigned char) (timestamp >> 24), (unsigned char) (timestamp >> 16), (unsigned char) (timestamp >> 8), (unsigned char) (timestamp >> 0)};
+            UartEncodeAndSendMessage(0x0050, 5, payload);
+        }
+
         //LED_BLANCHE = !LED_BLANCHE;
         //LED_BLEUE = !LED_BLEUE;
         //LED_ORANGE = !LED_ORANGE;
 
-         __delay32(1000);
+        //__delay32(1000);
         //SendMessageDirect((unsigned char*) "Bonjour", 7);
         //__delay32(40000000);
     } // fin main
@@ -339,13 +357,11 @@ void SetNextRobotStateInAutomaticMode(void) {
     //        nextStateRobot = STATE_TOURNE_SUR_PLACE_GAUCHE;
 
     //Si l?on n?est pas dans la transition de l?étape en cours
-    if (nextStateRobot != stateRobot - 1)
-    {
+    if (nextStateRobot != stateRobot - 1) {
         //Appelé si on doit changer d'état 
         stateRobot = nextStateRobot;
-        unsigned char payload[] = {stateRobot, (unsigned char)(timestamp>>24), (unsigned char)(timestamp>>16), (unsigned char)(timestamp>>8), (unsigned char)(timestamp>>0)};
-        UartEncodeAndSendMessage(0x0050, 5, payload);
-                
+        etatEnAttente = 1;
+
     }
 }
 

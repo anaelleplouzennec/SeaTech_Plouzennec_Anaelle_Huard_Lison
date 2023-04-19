@@ -25,7 +25,9 @@ unsigned int ADCValue0, ADCValue1, ADCValue2, ADCValue3, ADCValue4;
 unsigned char sensorCode;
 unsigned char etatEnAttente = 0;
 unsigned char stateRobot;
+unsigned char autoControlActivated = 0;
 unsigned char payload[] = {'B', 'o', 'n', 'j', 'o', 'u', 'r'};
+
 
 int counterEnvoi = 0;
 
@@ -132,13 +134,18 @@ int main(void) {
         //LED_ORANGE = !LED_ORANGE;
 
         //__delay32(1000);
-        //SendMessageDirect((unsigned char*) "Bonjour", 7);
-        //__delay32(40000000);
+        SendMessageDirect((unsigned char*) "Bonjour", 7);
+        __delay32(40000000);
     } // fin main
 }
 
+void SetRobotAutoControlState(unsigned char autoControlState) {
+    autoControlActivated = autoControlState;
+}
 
-unsigned char stateRobot;
+void SetRobotState(unsigned char state) {
+    stateRobot = state;
+}
 
 void OperatingSystemLoop(void) {
     switch (stateRobot) {
@@ -159,7 +166,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_AVANCE_EN_COURS;
             break;
         case STATE_AVANCE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_GAUCHE:
@@ -168,7 +177,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_GAUCHE_EN_COURS;
             break;
         case STATE_TOURNE_GAUCHE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_DROITE:
@@ -177,7 +188,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_DROITE_EN_COURS;
             break;
         case STATE_TOURNE_DROITE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_SUR_PLACE_GAUCHE:
@@ -186,7 +199,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_SUR_PLACE_GAUCHE_EN_COURS;
             break;
         case STATE_TOURNE_SUR_PLACE_GAUCHE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_SUR_PLACE_DROITE:
@@ -195,7 +210,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_SUR_PLACE_DROITE_EN_COURS;
             break;
         case STATE_TOURNE_SUR_PLACE_DROITE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_LEGER_DROITE:
@@ -204,7 +221,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_LEGER_DROITE_EN_COURS;
 
         case STATE_TOURNE_LEGER_DROITE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
 
         case STATE_TOURNE_LEGER_GAUCHE:
@@ -213,7 +232,9 @@ void OperatingSystemLoop(void) {
             stateRobot = STATE_TOURNE_LEGER_GAUCHE_EN_COURS;
 
         case STATE_TOURNE_LEGER_GAUCHE_EN_COURS:
-            SetNextRobotStateInAutomaticMode();
+            if (autoControlActivated == 1) {
+                SetNextRobotStateInAutomaticMode();
+            }
             break;
         default:
             stateRobot = STATE_ATTENTE;

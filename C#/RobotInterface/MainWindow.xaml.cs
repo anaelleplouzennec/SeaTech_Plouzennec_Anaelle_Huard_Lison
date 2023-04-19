@@ -14,16 +14,22 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ExtendedSerialPort;
 using System.Windows.Threading;
+using MouseKeyboardActivityMonitor.WinApi;
+using MouseKeyboardActivityMonitor;
+using System.Windows.Forms;
+
 namespace RobotInterface
 {
     /// <summary>
     /// Logique d'interaction pour MainWindow.xaml
     /// </summary>
+    
     public partial class MainWindow : Window
     {
         ReliableSerialPort serialPort1;
         DispatcherTimer timerAffichage;
         Robot robot;
+        private readonly KeyboardHookListener m_KeyboardHookManager;
         public MainWindow()
         {
             InitializeComponent();
@@ -38,10 +44,35 @@ namespace RobotInterface
             timerAffichage.Tick += TimerAffichage_Tick;
             timerAffichage.Start();
 
+            m_KeyboardHookManager = new KeyboardHookListener(new GlobalHooker());
+            m_KeyboardHookManager.Enabled = true;
+            m_KeyboardHookManager.KeyDown += M_KeyboardHookManager_KeyDown;                
         }
 
+        private void M_KeyboardHookManager_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+        {            
+                switch (e.KeyCode)
+                {
+                    case Keys.Left:
+                        UartEncodeAndSendMessage(0x0051, 1, new byte[] { (byte)StateRobot.STATE_TOURNE_SUR_PLACE_GAUCHE });
+                        break;
+                    case Keys.Right:
+                        UartEncodeAndSendMessage(0x0051, 1, new byte[] { (byte)StateRobot.STATE_TOURNE_SUR_PLACE_DROITE });
+                        break;
+                    case Keys.Up:
+                        UartEncodeAndSendMessage(0x0051, 1, new byte[] { (byte)StateRobot.STATE_AVANCE });
+                        break;
+                    case Keys.Down:
+                        UartEncodeAndSendMessage(0x0051, 1, new byte[] { (byte)StateRobot.STATE_ARRET });
+                        break;
+                    case Keys.PageDown:
+                        UartEncodeAndSendMessage(0x0051, 1, new byte[] { (byte)StateRobot.STATE_RECULE });
+                        break;
+                }
+        }
 
-        private void TimerAffichage_Tick(object sender, EventArgs e)
+    
+    private void TimerAffichage_Tick(object sender, EventArgs e)
         {
             //if (robot.receivedText != "")
             //{
@@ -92,7 +123,7 @@ namespace RobotInterface
 
         }
 
-        private void TextBoxEmission_KeyUp(object sender, KeyEventArgs e)
+        private void TextBoxEmission_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
@@ -331,14 +362,14 @@ namespace RobotInterface
                     break;
 
                 case TypeMessage.Telemetre:
-                    Télémètres_IR.Content = " IR Gauche : " + msgPayload[0] + "cm\n";
-                    Télémètres_IR.Content += " IR Centre : " + msgPayload[1] + "cm\n";
-                    Télémètres_IR.Content += " IR Droit : " + msgPayload[2] + "cm\n";
+                    LabelTeleIrGauche.Content +=  msgPayload[0] + "cm\n";
+                    LabelTeleIrCentre.Content += msgPayload[1] + "cm\n";
+                    LabelTeleIrDroite.Content += msgPayload[2] + "cm\n";
                     break;
 
                 case TypeMessage.VitesseMoteur:
-                    Moteurs.Content = "Vitesse Gauche : " + msgPayload[0] + "%\n";
-                    Moteurs.Content += "Vitesse Droit : " + msgPayload[1]  + "%\n";
+                    LabelMoteurGauche.Content +=  msgPayload[0] + "%\n";
+                    LabelMoteurDroit.Content +=  msgPayload[1]  + "%\n";
                     break;
 
                 case TypeMessage.Texte:
@@ -346,6 +377,18 @@ namespace RobotInterface
                     textBoxReception.Text += "\nRobot State : " + ((StateRobot)(msgPayload[0])).ToString() + " - " + instant.ToString() + " ms";
                     break;
             }
+        }
+
+        private void checkBox_Checked(object sender, RoutedEventArgs e)
+        {
+            //if ((bool)AutomaticMode.IsChecked)
+            //{
+            //    Robot.autoControlActivated = 1;
+            //}
+            //else
+            //{
+            //    Robot.autoControlActivated = 0;
+            //}
         }
     }
 

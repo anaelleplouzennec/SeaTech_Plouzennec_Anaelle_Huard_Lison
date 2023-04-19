@@ -104,7 +104,7 @@ void UartDecodeMessage(unsigned char c) {
             if (calculatedChecksum == receivedChecksum) {
 
                 //Success, on a un message valide
-                UartProcessDecodedMessage(msgDecodedFunction, msgDecodedPayloadLength, msgDecodedPayload);
+                UartProcessDecodedMessage(msgDecodedFunction, msgDecodedPayload);
             }
             rcvState = Waiting;
         }
@@ -115,44 +115,17 @@ void UartDecodeMessage(unsigned char c) {
     }
 }
 
-void UartProcessDecodedMessage(int msgFunction, int msgPayloadLength, unsigned char* msgPayload) {
+
+void UartProcessDecodedMessage(unsigned char function, unsigned char payload[]) {
     //Fonction appelee apres le decodage pour executer l?action
     //correspondant au message recu
-    switch (msgFunction) {
-        case 0x0020:
-            if (msgPayload[0] == 1) {
-                if (msgPayload[1] == 1) {
-
-                } else {
-
-                }
-            } else if (msgPayload[0] == 2) {
-                if (msgPayload[1] == 1) {
-
-                } else {
-
-                }
-            } else if (msgPayload[0] == 3) {
-                if (msgPayload[1] == 1) {
-
-                } else {
-
-                }
-            }
+    switch (function) {
+        case SET_ROBOT_STATE:
+            SetRobotState(payload[0]);
             break;
-        case 0x0030: if (msgPayload[0] == 1) {
-
-            } else if (msgPayload[0] == 2) {
-
-            } else if (msgPayload[0] == 3) {
-
-            }
-        case 0x0040:
-            if (msgPayload[0] == 1) {
-
-            } else if (msgPayload[0] == 2) {
-
-            }
+        case SET_ROBOT_MANUAL_CONTROL: 
+            SetRobotAutoControlState(payload[0]);
+        default:
             break;
     }
 }

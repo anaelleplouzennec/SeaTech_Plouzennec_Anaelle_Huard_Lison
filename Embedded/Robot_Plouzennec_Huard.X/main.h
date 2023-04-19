@@ -37,8 +37,10 @@
 #define OBSTACLE_A_DROITE 2
 #define OBSTACLE_EN_FACE 3
 
+
 void OperatingSystemLoop(void);
 void SetNextRobotStateInAutomaticMode(void);
-
+void SetRobotAutoControlState(unsigned char);
+void SetRobotState(unsigned char);
 #endif	/* MAIN_H */
 

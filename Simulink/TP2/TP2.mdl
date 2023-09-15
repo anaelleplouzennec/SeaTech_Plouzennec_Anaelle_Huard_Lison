@@ -129,7 +129,7 @@ Model {
   ModifiedByFormat	  "%<Auto>"
   LastModifiedBy	  "GEII Robot"
   ModifiedDateFormat	  "%<Auto>"
-  LastModifiedDate	  "Fri Sep 15 10:46:59 2023"
+  LastModifiedDate	  "Fri Sep 15 10:50:33 2023"
   RTWModifiedTimeStamp	  616675593
   ModelVersionFormat	  "1.%<AutoIncrement:6>"
   SampleTimeColors	  off
@@ -2305,7 +2305,7 @@ Model {
       "67;0.717647058823529 0.274509803921569 1;0.392156862745098 0.831372549019608 0.0745098039215686;0.05882352941176"
       "47 1 1;1 0.0745098039215686 0.650980392156863])),extmgr.Configuration('Tools','Plot Navigation',true,'OnceAtStop"
       "',false,'PreviousAutoscale','XY'),extmgr.Configuration('Tools','Measurements',true,'Version','2017b')),'Version'"
-      ",'2017b','Position',[1 49 1920 955],'VisibleAtModelOpen','on')"
+      ",'2017b','Position',[1 49 1920 955])"
       NumInputPorts	      "1"
     }
     Block {
@@ -2357,8 +2357,7 @@ Model {
       "411764705882353 0.16078431372549;1 1 0.0666666666666667;0.717647058823529 0.274509803921569 1;0.392156862745098 "
       "0.831372549019608 0.0745098039215686;0.0588235294117647 1 1;1 0.0745098039215686 0.650980392156863])),extmgr.Con"
       "figuration('Tools','Plot Navigation',true,'OnceAtStop',false,'PreviousAutoscale','XY'),extmgr.Configuration('Too"
-      "ls','Measurements',true,'Version','2017b')),'Version','2017b','Position',[1 49 1920 955],'VisibleAtModelOpen','o"
-      "n')"
+      "ls','Measurements',true,'Version','2017b')),'Version','2017b','Position',[1 49 1920 955])"
       NumInputPorts	      "1"
     }
     Line {

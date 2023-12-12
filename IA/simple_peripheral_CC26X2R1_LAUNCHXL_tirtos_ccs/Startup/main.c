@@ -62,6 +62,7 @@
 #include "simple_peripheral.h"
 #include "./TacheADC/TacheADC.h"
 #include "./TacheLCD/TacheLCD.h"
+#include "./TacheFFTClassification/TacheFFTClassification.h"
 #ifdef PTM_MODE
 #include "npi_task.h"
 #endif // PTM_MODE
@@ -158,6 +159,7 @@ int main()
  // SimplePeripheral_createTask();.
   TacheADC_CreateTask();
   TacheLCD_CreateTask();
+  TacheFFTClassification_CreateTask();
 
   /* enable interrupts and start SYS/BIOS */
   BIOS_start();

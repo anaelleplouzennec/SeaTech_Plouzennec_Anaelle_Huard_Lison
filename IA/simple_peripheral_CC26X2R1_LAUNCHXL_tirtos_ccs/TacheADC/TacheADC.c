@@ -18,6 +18,7 @@
 #include <TacheADC/TacheADC.h>
 #include <TacheLCD/TacheLCD.h>
 #include <Filters/Filter.h>
+#include <TacheFFTClassification/TacheFFTClassification.h>
 /* Driver Header files */
 #include <ti/drivers/ADC.h>
 /* Driver configuration */
@@ -36,6 +37,12 @@ Order1Filter LPFilterAccelZ;
 Order1Filter HPFilterAccelX;
 Order1Filter HPFilterAccelY;
 Order1Filter HPFilterAccelZ;
+
+Order1Filter HPFilterAccelNorme;
+
+#define FFT_WINDOW_SIZE 256
+float SerieNormeAccel[FFT_WINDOW_SIZE];
+int indexFFT;
 
 static Clock_Struct myClock;
 
@@ -81,6 +88,7 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
     InitOrder1HPFilterEuler(&HPFilterAccelX, 1, 100);
     InitOrder1HPFilterEuler(&HPFilterAccelY, 1, 100);
     InitOrder1HPFilterEuler(&HPFilterAccelZ, 1, 100);
+    InitOrder1HPFilterEuler(&HPFilterAccelNorme, 1, 100);
 
     for (;;)
     {
@@ -99,6 +107,19 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
         float AccelHPX = ComputeOrder1Filter(&HPFilterAccelX, xG);
         float AccelHPY = ComputeOrder1Filter(&HPFilterAccelY, yG);
         float AccelHPZ = ComputeOrder1Filter(&HPFilterAccelZ, zG);
+
+        float normeAccel = sqrtf(AccelHPX*AccelHPX+AccelHPY*AccelHPY+AccelHPZ*AccelHPZ);
+        float normeAccelHP = ComputeOrder1Filter(&HPFilterAccelNorme, normeAccel);
+        SerieNormeAccel[indexFFT] = normeAccelHP;
+        indexFFT++;
+        if(indexFFT>=FFT_WINDOW_SIZE)
+        {
+            //On lance la tache de calcul de la FFT et classification
+            FFTClassificationTrigger(SerieNormeAccel);
+            //Le resultat est recupere dans DataYFFT
+            indexFFT = 0;
+        }
+
         float features[6];
         features[0]= AccelHPX;
         features[1]= 0;

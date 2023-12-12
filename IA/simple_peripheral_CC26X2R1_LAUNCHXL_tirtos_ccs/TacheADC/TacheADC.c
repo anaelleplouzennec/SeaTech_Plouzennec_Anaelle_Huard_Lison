@@ -17,6 +17,7 @@
 #include <ti/sysbios/BIOS.h>
 #include <TacheADC/TacheADC.h>
 #include <TacheLCD/TacheLCD.h>
+#include <Filters/Filter.h>
 /* Driver Header files */
 #include <ti/drivers/ADC.h>
 /* Driver configuration */
@@ -28,7 +29,13 @@ Task_Struct TacheADC;
 uint8_t TacheADCStack[TacheADC_TASK_STACK_SIZE];
 Semaphore_Struct semTacheADCStruct;
 Semaphore_Handle semTacheADCHandle;
+Order1Filter LPFilterAccelX;
+Order1Filter LPFilterAccelY;
+Order1Filter LPFilterAccelZ;
 
+Order1Filter HPFilterAccelX;
+Order1Filter HPFilterAccelY;
+Order1Filter HPFilterAccelZ;
 
 static Clock_Struct myClock;
 
@@ -65,6 +72,16 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
     Clock_start(Clock_handle(&myClock));
     //Initialisation du module ADC
     ADC_init();
+    // Initialisation des filtres passe bas
+    InitOrder1LPFilterEuler(&LPFilterAccelX, 1, 100);
+    InitOrder1LPFilterEuler(&LPFilterAccelY, 1, 100);
+    InitOrder1LPFilterEuler(&LPFilterAccelZ, 1, 100);
+
+    // Initialisation des filtres passe haut
+    InitOrder1HPFilterEuler(&HPFilterAccelX, 1, 100);
+    InitOrder1HPFilterEuler(&HPFilterAccelY, 1, 100);
+    InitOrder1HPFilterEuler(&HPFilterAccelZ, 1, 100);
+
     for (;;)
     {
         Semaphore_pend(semTacheADCHandle, BIOS_WAIT_FOREVER);
@@ -74,12 +91,20 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
         float xG = uVToG_float(DatasampledX);
         float yG = uVToG_float(DatasampledY);
         float zG = uVToG_float(DatasampledZ);
+        //Filtre passe-bas sur les 3 axes
+        //float AccelLPX = ComputeOrder1Filter(&LPFilterAccelX, xG);
+        //float AccelLPY = ComputeOrder1Filter(&LPFilterAccelY, yG);
+        //float AccelLPZ = ComputeOrder1Filter(&LPFilterAccelZ, zG);
+        // Filtres passe haut
+        float AccelHPX = ComputeOrder1Filter(&HPFilterAccelX, xG);
+        float AccelHPY = ComputeOrder1Filter(&HPFilterAccelY, yG);
+        float AccelHPZ = ComputeOrder1Filter(&HPFilterAccelZ, zG);
         float features[6];
-        features[0]= xG;
+        features[0]= AccelHPX;
         features[1]= 0;
-        features[2]= yG;
+        features[2]= AccelHPY;
         features[3]= 0;
-        features[4]= zG;
+        features[4]= AccelHPZ;
         features[5]= 0;
         LCD_PrintState(0, 0, 0, 0, features, 6);
 

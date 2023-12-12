@@ -16,6 +16,7 @@
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/BIOS.h>
 #include <TacheADC/TacheADC.h>
+#include <TacheLCD/TacheLCD.h>
 /* Driver Header files */
 #include <ti/drivers/ADC.h>
 /* Driver configuration */
@@ -44,6 +45,12 @@ uint32_t Sampling(uint_least8_t Board_ADC_Number){
     return adcValue1MicroVolt;
 }
 
+float uVToG_float(uint32_t dataSampled)
+{
+    float dataG = ((float)dataSampled - 1650000)/660000;
+    return dataG;
+}
+
 void TacheADC_taskFxn(UArg a0, UArg a1)
 {
     // Declaration d’une structure clock_Params
@@ -64,6 +71,17 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
         uint32_t DatasampledX = Sampling(CONFIG_ADC_0);
         uint32_t DatasampledY = Sampling(CONFIG_ADC_1);
         uint32_t DatasampledZ = Sampling(CONFIG_ADC_2);
+        float xG = uVToG_float(DatasampledX);
+        float yG = uVToG_float(DatasampledY);
+        float zG = uVToG_float(DatasampledZ);
+        float features[6];
+        features[0]= xG;
+        features[1]= 0;
+        features[2]= yG;
+        features[3]= 0;
+        features[4]= zG;
+        features[5]= 0;
+        LCD_PrintState(0, 0, 0, 0, features, 6);
 
     }
 }

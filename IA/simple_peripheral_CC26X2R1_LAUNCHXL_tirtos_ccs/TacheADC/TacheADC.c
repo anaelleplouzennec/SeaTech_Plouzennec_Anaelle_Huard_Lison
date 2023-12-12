@@ -16,6 +16,10 @@
 #include <ti/sysbios/knl/Semaphore.h>
 #include <ti/sysbios/BIOS.h>
 #include <TacheADC/TacheADC.h>
+/* Driver Header files */
+#include <ti/drivers/ADC.h>
+/* Driver configuration */
+#include "ti_drivers_config.h"
 
 #define TacheADC_TASK_PRIORITY 3
 #define TacheADC_TASK_STACK_SIZE 1024
@@ -26,6 +30,19 @@ Semaphore_Handle semTacheADCHandle;
 
 
 static Clock_Struct myClock;
+
+uint32_t Sampling(uint_least8_t Board_ADC_Number){
+    ADC_Handle adc;
+    ADC_Params params;
+    ADC_Params_init(&params);
+    uint16_t adcValue;
+    uint32_t adcValue1MicroVolt;
+    adc = ADC_open(Board_ADC_Number, &params);
+    ADC_convert(adc, &adcValue);
+    adcValue1MicroVolt = ADC_convertRawToMicroVolts(adc, adcValue);
+    ADC_close(adc);
+    return adcValue1MicroVolt;
+}
 
 void TacheADC_taskFxn(UArg a0, UArg a1)
 {
@@ -39,8 +56,15 @@ void TacheADC_taskFxn(UArg a0, UArg a1)
     Clock_construct(&myClock, myClockSwiFxn, 0, &clockParams);
     //Lancement du timer
     Clock_start(Clock_handle(&myClock));
+    //Initialisation du module ADC
+    ADC_init();
     for (;;)
     {
+        Semaphore_pend(semTacheADCHandle, BIOS_WAIT_FOREVER);
+        uint32_t DatasampledX = Sampling(CONFIG_ADC_0);
+        uint32_t DatasampledY = Sampling(CONFIG_ADC_1);
+        uint32_t DatasampledZ = Sampling(CONFIG_ADC_2);
+
     }
 }
 
